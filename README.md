@@ -5,6 +5,8 @@ Using DynamoDB consistent read to enforce message order from SQS.
 [![Build
 Status](https://travis-ci.org/BBC-News/alephant-sequencer.png)](https://travis-ci.org/BBC-News/alephant-sequencer)
 
+[![Gem Version](https://badge.fury.io/rb/alephant-sequencer.png)](http://badge.fury.io/rb/alephant-sequencer)
+
 ## Installation
 
 Add this line to your application's Gemfile:
