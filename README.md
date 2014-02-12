@@ -2,6 +2,9 @@
 
 Using DynamoDB consistent read to enforce message order from SQS.
 
+[![Build
+Status](https://travis-ci.org/BBC-News/alephant-sequencer.png)](https://travis-ci.org/BBC-News/alephant-sequencer)
+
 ## Installation
 
 Add this line to your application's Gemfile:
