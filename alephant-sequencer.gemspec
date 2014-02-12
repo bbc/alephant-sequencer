@@ -8,8 +8,7 @@ Gem::Specification.new do |spec|
   spec.version       = Alephant::Sequencer::VERSION
   spec.authors       = ["Robert Kenny"]
   spec.email         = ["kenoir@gmail.com"]
-  spec.summary       = %q{TODO: Write a short summary. Required.}
-  spec.description   = %q{TODO: Write a longer description. Optional.}
+  spec.summary       = %q{Adds sequencing functionality to Alephant.}
   spec.homepage      = ""
   spec.license       = "MIT"
 
