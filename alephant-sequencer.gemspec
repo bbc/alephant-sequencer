@@ -28,5 +28,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "pry-nav"
 
   spec.add_runtime_dependency 'aws-sdk', '~> 1.0'
+  spec.add_runtime_dependency 'alephant-logger'
   spec.add_runtime_dependency 'jsonpath'
 end
