@@ -38,7 +38,7 @@ describe Alephant::Sequencer do
         table.should_receive(:sequence_for).with(ident).and_return(:expected_value)
 
         expect(
-          Alephant::Sequencer::Sequencer.new(table, ident).get_last_seen
+          Alephant::Sequencer::Sequencer.new(table, ident, jsonpath).get_last_seen
         ).to eq(:expected_value)
       end
     end
@@ -53,7 +53,15 @@ describe Alephant::Sequencer do
         table.stub(:create)
         table.should_receive(:set_sequence_for).with(ident, last_seen)
 
-        Alephant::Sequencer::Sequencer.new(table, ident).set_last_seen(data)
+        Alephant::Sequencer::Sequencer.new(table, ident, jsonpath).set_last_seen(data)
+      end
+    end
+
+    describe "#sequence_id_from(data)" do
+      subject { Alephant::Sequencer::Sequencer.new(sequence_table, ident, '$.set_sequence_id') }
+      it "should return the id described by the set jsonpath" do
+        msg = Struct.new(:body).new({ "set_sequence_id" => 1 })
+        expect(subject.sequence_id_from msg).to eq(1)
       end
     end
 
@@ -83,7 +91,7 @@ describe Alephant::Sequencer do
       end
 
       context "jsonpath = nil" do
-        let(:jsonpath) { nil }
+        let(:jsonpath) { '$.sequence_id' }
         subject { Alephant::Sequencer::Sequencer.new(sequence_table, :ident, jsonpath) }
 
         context "sequential" do

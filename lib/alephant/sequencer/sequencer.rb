@@ -7,7 +7,7 @@ module Alephant
       include ::Alephant::Logger
       attr_reader :ident, :jsonpath
 
-      def initialize(sequence_table, id, sequence_path = nil)
+      def initialize(sequence_table, id, sequence_path)
         @mutex = Mutex.new
         @sequence_table = sequence_table
         @jsonpath = sequence_path
@@ -16,8 +16,8 @@ module Alephant
         @sequence_table.create
       end
 
-      def sequential?(data)
-        get_last_seen < sequence_id_from(data)
+      def sequential?(msg)
+        get_last_seen < sequence_id_from(msg)
       end
 
       def delete!
@@ -25,8 +25,8 @@ module Alephant
         @sequence_table.delete_item!(ident)
       end
 
-      def set_last_seen(data)
-        last_seen_id = sequence_id_from(data)
+      def set_last_seen(msg)
+        last_seen_id = sequence_id_from(msg)
         logger.info("Sequencer.set_last_seen: #{last_seen_id}")
 
         @sequence_table.set_sequence_for(ident, last_seen_id)
@@ -36,21 +36,9 @@ module Alephant
         @sequence_table.sequence_for(ident)
       end
 
-      private
-      def sequence_id_from(data)
-        jsonpath.nil? ?
-          default_sequence_id_for(data) :
-          sequence_from_jsonpath_for(data)
+      def sequence_id_from(msg)
+        JsonPath.on(msg.body, jsonpath).first
       end
-
-      def sequence_from_jsonpath_for(data)
-        JsonPath.on(data.body, jsonpath).first
-      end
-
-      def default_sequence_id_for(data)
-        data.body['sequence_id'].to_i
-      end
-
     end
   end
 end
