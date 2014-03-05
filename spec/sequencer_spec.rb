@@ -14,17 +14,28 @@ describe Alephant::Sequencer do
   describe Alephant::Sequencer::Sequencer do
     let(:data)     { double() }
     let(:last_seen) { 42 }
-    let(:sequence_table) { double().tap { |o| o.stub(:create) } }
-    subject { Alephant::Sequencer::Sequencer.new(sequence_table, ident, jsonpath) }
+
+    def sequence_table
+      table = double()
+      table.stub(:create)
+      table.stub(:sequence_exists)
+      table.stub(:sequence_for)
+      table.stub(:set_sequence_for)
+
+      table
+    end
 
     describe "#initialize(opts, id)" do
       it "sets @jsonpath, @ident" do
+        subject = Alephant::Sequencer::Sequencer.new(sequence_table, ident, jsonpath)
+
         expect(subject.jsonpath).to eq(jsonpath)
         expect(subject.ident).to eq(ident)
       end
 
       it "calls create on sequence_table" do
         table = double()
+        table.stub(:sequence_exists)
         table.should_receive(:create)
 
         Alephant::Sequencer::Sequencer.new(table, ident, jsonpath)
@@ -34,6 +45,7 @@ describe Alephant::Sequencer do
     describe "#get_last_seen" do
       it "returns sequence_table.sequence_for(ident)" do
         table = double()
+        table.stub(:sequence_exists)
         table.stub(:create)
         table.should_receive(:sequence_for).with(ident).and_return(:expected_value)
 
@@ -50,8 +62,10 @@ describe Alephant::Sequencer do
 
       it "calls set_sequence_for(ident, last_seen)" do
         table = double()
+        table.stub(:sequence_exists)
         table.stub(:create)
-        table.should_receive(:set_sequence_for).with(ident, last_seen)
+        table.stub(:sequence_for)
+        table.should_receive(:set_sequence_for).with(ident, last_seen, nil)
 
         Alephant::Sequencer::Sequencer.new(table, ident, jsonpath).set_last_seen(data)
       end

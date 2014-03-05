@@ -2,9 +2,13 @@ require 'aws-sdk'
 require 'thread'
 require 'timeout'
 
+require 'alephant/logger'
+
 module Alephant
   module Sequencer
     class SequenceTable
+      include ::Alephant::Logger
+
       attr_reader :table_name
 
       TIMEOUT = 120
@@ -37,19 +41,25 @@ module Alephant
         @table ||= @dynamo_db.tables[@table_name]
       end
 
-      def sequence_for(ident)
-        rows = batch_get_value_for(ident)
-        rows.count >= 1 ? rows.first['value'].to_i : 0
+      def sequence_exists(ident)
+        !(table.items.where(:key => ident) == 0)
       end
 
-      def set_sequence_for(ident,value)
-        @mutex.synchronize do
-          AWS::DynamoDB::BatchWrite.new.tap { |batch|
-            batch.put(
-              table_name,
-              [:key => ident,:value => value]
+      def sequence_for(ident)
+        rows = batch_get_value_for(ident)
+        rows.count >= 1 ? rows.first['value'].to_i : nil
+      end
+
+      def set_sequence_for(ident, value, last_seen_check = nil)
+        begin
+          @mutex.synchronize do
+            table.items.put(
+              {:key => ident, :value => value },
+              put_condition(last_seen_check)
             )
-          }.process!
+          end
+        rescue AWS::DynamoDB::Errors::ConditionalCheckFailedException => e
+          logger.warn("SequenceTable#set_sequence_for: #{e.message}")
         end
       end
 
@@ -58,8 +68,20 @@ module Alephant
       end
 
       private
+      def put_condition(last_seen_check)
+        last_seen_check.nil? ? unless_exists(:key) : if_value(last_seen_check)
+      end
+
       def batch_get_value_for(ident)
         table.batch_get(['value'],[ident],batch_get_opts)
+      end
+
+      def unless_exists(key)
+        { :unless_exists => key }
+      end
+
+      def if_value(value)
+        { :if => { :value => value.to_i } }
       end
 
       def batch_get_opts
