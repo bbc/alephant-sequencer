@@ -26,9 +26,10 @@ module Alephant
       end
 
       def sequence(msg, &block)
-        unless(!sequential?(msg))
-          last_seen_id = get_last_seen
-          block.call(msg)
+        last_seen_id = get_last_seen
+        block.call(msg)
+
+        if sequential?(msg)
           set_last_seen(msg, last_seen_id)
         end
       end
