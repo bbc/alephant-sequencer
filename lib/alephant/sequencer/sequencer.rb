@@ -26,11 +26,13 @@ module Alephant
       end
 
       def sequence(msg, &block)
-        last_seen_id = get_last_seen
         block.call(msg)
 
-        if sequential?(msg)
+        last_seen_id = get_last_seen
+        if (last_seen_id || 0) < sequence_id_from(msg)
           set_last_seen(msg, last_seen_id)
+        else
+          logger.info("Sequencer#sequence nonsequential message for #{ident}")
         end
       end
 
@@ -42,7 +44,6 @@ module Alephant
 
       def set_last_seen(msg, last_seen_check = nil)
         seen_id = sequence_id_from(msg)
-        logger.info("Sequencer#set_last_seen: #{seen_id}")
 
         @sequence_table.set_sequence_for(
           ident, seen_id,

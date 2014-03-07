@@ -58,8 +58,18 @@ module Alephant
               put_condition(last_seen_check)
             )
           end
+
+          logger.info("SequenceTable#set_sequence_for: #{value} for #{ident} success!")
         rescue AWS::DynamoDB::Errors::ConditionalCheckFailedException => e
-          logger.warn("SequenceTable#set_sequence_for: #{e.message}")
+          logger.warn("SequenceTable#set_sequence_for: #{ident} #{e.message}")
+          last_seen_check = sequence_for(ident)
+
+          unless last_seen_check >= value
+            logger.info("SequenceTable#set_sequence_for: #{ident} trying again!")
+            set_sequence_for(ident, value, last_seen_check)
+          else
+            logger.warn("SequenceTable#set_sequence_for: #{ident} outdated!")
+          end
         end
       end
 
