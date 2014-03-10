@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Alephant::Sequencer do
   let(:ident) { :ident }
-  let(:jsonpath) { :jsonpath }
+  let(:jsonpath) { "$.sequence_id" }
 
   describe ".create(table_name, ident, jsonpath)" do
     it "should return a Sequencer" do
@@ -39,6 +39,108 @@ describe Alephant::Sequencer do
         table.should_receive(:create)
 
         Alephant::Sequencer::Sequencer.new(table, ident, jsonpath)
+      end
+    end
+
+
+    describe "#sequence(msg, &block)" do
+      let(:message) do
+        m = double()
+        m.stub(:body)
+
+        m
+      end
+
+      let(:a_proc) do
+        a_block = double()
+        a_block.should_receive(:called).with(message)
+
+        Proc.new do |msg|
+          a_block.called(msg)
+        end
+      end
+
+      let(:stubbed_last_seen) { 2 }
+      let(:stubbed_seen_high) { 3 }
+      let(:stubbed_seen_low)  { 1 }
+
+      it "should call the passed block with msg" do
+        subject = Alephant::Sequencer::Sequencer.new(sequence_table, ident, jsonpath)
+        subject.sequence(message, &a_proc)
+      end
+
+      context "last_seen_id is nil" do
+        before(:each) do
+          Alephant::Sequencer::Sequencer.any_instance
+            .stub(:get_last_seen).and_return(nil)
+
+          Alephant::Sequencer::Sequencer.any_instance
+            .stub(:sequence_id_from).and_return(stubbed_seen_high)
+        end
+
+        it "should not call set_last_seen(msg, last_seen_id)" do
+          Alephant::Sequencer::Sequencer.any_instance
+            .should_receive(:set_last_seen)
+            .with(message, nil)
+
+          subject = Alephant::Sequencer::Sequencer.new(sequence_table, ident, jsonpath)
+          subject.sequence(message, &a_proc)
+        end
+      end
+
+      context "last_seen_id == sequence_id_from(msg)" do
+        before(:each) do
+          Alephant::Sequencer::Sequencer.any_instance
+            .stub(:get_last_seen).and_return(stubbed_last_seen)
+
+          Alephant::Sequencer::Sequencer.any_instance
+            .stub(:sequence_id_from).and_return(stubbed_last_seen)
+        end
+
+        it "should not call set_last_seen(msg, last_seen_id)" do
+          Alephant::Sequencer::Sequencer.any_instance
+            .should_not_receive(:set_last_seen)
+
+          subject = Alephant::Sequencer::Sequencer.new(sequence_table, ident, jsonpath)
+          subject.sequence(message, &a_proc)
+        end
+      end
+
+      context "last_seen_id > sequence_id_from(msg)" do
+        before(:each) do
+          Alephant::Sequencer::Sequencer.any_instance
+            .stub(:get_last_seen).and_return(stubbed_last_seen)
+
+          Alephant::Sequencer::Sequencer.any_instance
+            .stub(:sequence_id_from).and_return(stubbed_seen_low)
+        end
+
+        it "should not call set_last_seen(msg, last_seen_id)" do
+          Alephant::Sequencer::Sequencer.any_instance
+            .should_not_receive(:set_last_seen)
+
+          subject = Alephant::Sequencer::Sequencer.new(sequence_table, ident, jsonpath)
+          subject.sequence(message, &a_proc)
+        end
+      end
+
+      context "last_seen_id < sequence_id_from(msg)" do
+        before(:each) do
+          Alephant::Sequencer::Sequencer.any_instance
+            .stub(:get_last_seen).and_return(stubbed_last_seen)
+
+          Alephant::Sequencer::Sequencer.any_instance
+            .stub(:sequence_id_from).and_return(stubbed_seen_high)
+        end
+
+        it "should call set_last_seen(msg, last_seen_id)" do
+          Alephant::Sequencer::Sequencer.any_instance
+            .should_receive(:set_last_seen)
+            .with(message, stubbed_last_seen)
+
+          subject = Alephant::Sequencer::Sequencer.new(sequence_table, ident, jsonpath)
+          subject.sequence(message, &a_proc)
+        end
       end
     end
 
