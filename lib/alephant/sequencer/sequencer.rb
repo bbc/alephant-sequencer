@@ -18,7 +18,7 @@ module Alephant
       end
 
       def sequential?(msg)
-        (get_last_seen || 0) < sequence_id_from(msg)
+        (get_last_seen || 0) < Sequencer.sequence_id_from(msg, jsonpath)
       end
 
       def exists?
@@ -29,7 +29,7 @@ module Alephant
         block.call(msg)
 
         last_seen_id = get_last_seen
-        if (last_seen_id || 0) < sequence_id_from(msg)
+        if (last_seen_id || 0) < Sequencer.sequence_id_from(msg, jsonpath)
           set_last_seen(msg, last_seen_id)
         else
           logger.info("Sequencer#sequence nonsequential message for #{ident}")
@@ -43,7 +43,7 @@ module Alephant
       end
 
       def set_last_seen(msg, last_seen_check = nil)
-        seen_id = sequence_id_from(msg)
+        seen_id = Sequencer.sequence_id_from(msg, jsonpath)
 
         @sequence_table.set_sequence_for(
           ident, seen_id,
@@ -55,8 +55,8 @@ module Alephant
         @sequence_table.sequence_for(ident)
       end
 
-      def sequence_id_from(msg)
-        JsonPath.on(msg.body, jsonpath).first.to_i
+      def self.sequence_id_from(msg, path)
+        JsonPath.on(msg.body, path).first.to_i
       end
     end
   end

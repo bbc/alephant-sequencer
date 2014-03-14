@@ -74,7 +74,7 @@ describe Alephant::Sequencer do
           Alephant::Sequencer::Sequencer.any_instance
             .stub(:get_last_seen).and_return(nil)
 
-          Alephant::Sequencer::Sequencer.any_instance
+          Alephant::Sequencer::Sequencer
             .stub(:sequence_id_from).and_return(stubbed_seen_high)
         end
 
@@ -93,7 +93,7 @@ describe Alephant::Sequencer do
           Alephant::Sequencer::Sequencer.any_instance
             .stub(:get_last_seen).and_return(stubbed_last_seen)
 
-          Alephant::Sequencer::Sequencer.any_instance
+          Alephant::Sequencer::Sequencer
             .stub(:sequence_id_from).and_return(stubbed_last_seen)
         end
 
@@ -129,7 +129,7 @@ describe Alephant::Sequencer do
           Alephant::Sequencer::Sequencer.any_instance
             .stub(:get_last_seen).and_return(stubbed_last_seen)
 
-          Alephant::Sequencer::Sequencer.any_instance
+          Alephant::Sequencer::Sequencer
             .stub(:sequence_id_from).and_return(stubbed_seen_high)
         end
 
@@ -159,7 +159,7 @@ describe Alephant::Sequencer do
 
     describe "#set_last_seen(data)" do
       before(:each) do
-        Alephant::Sequencer::Sequencer.any_instance.stub(:sequence_id_from).and_return(last_seen)
+        Alephant::Sequencer::Sequencer.stub(:sequence_id_from).and_return(last_seen)
       end
 
       it "calls set_sequence_for(ident, last_seen)" do
@@ -173,11 +173,11 @@ describe Alephant::Sequencer do
       end
     end
 
-    describe "#sequence_id_from(data)" do
-      subject { Alephant::Sequencer::Sequencer.new(sequence_table, ident, '$.set_sequence_id') }
+    describe ".sequence_id_from(data)" do
+      subject { Alephant::Sequencer::Sequencer }
       it "should return the id described by the set jsonpath" do
         msg = Struct.new(:body).new({ "set_sequence_id" => 1 })
-        expect(subject.sequence_id_from msg).to eq(1)
+        expect(subject.sequence_id_from(msg,'$.set_sequence_id')).to eq(1)
       end
     end
 
