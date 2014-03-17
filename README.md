@@ -47,6 +47,7 @@ sequencer.sequential?(data)
 
 # Reset sequence
 sequencer.delete!
+```
 
 ## Contributing
 1. Fork it ( http://github.com/<my-github-username>/alephant-sequencer/fork )
