@@ -25,7 +25,7 @@ Or install it yourself as:
 
 ```rb
 
-require 'alephant-sequencer'
+require 'alephant/sequencer'
 
 #Optional JSONPath specifying location of sequence_id
 sequence_id = '$.sequence_number'
