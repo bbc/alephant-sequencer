@@ -30,7 +30,7 @@ require 'alephant/sequencer'
 #Optional JSONPath specifying location of sequence_id
 sequence_id = '$.sequence_number'
 
-sequencer = Sequencer.create(table_name, sqs_queue_url, sequence_id)
+sequencer = Alephant::Sequencer.create(table_name, sqs_queue_url, sequence_id)
 
 # Data from SQS message
 data = Struct.new(:body).new({:sequence_number => 3})
