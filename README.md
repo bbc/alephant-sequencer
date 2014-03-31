@@ -25,25 +25,27 @@ Or install it yourself as:
 
 ```rb
 
-require 'alephant/sequencer'
+require "alephant/sequencer"
 
-#Optional JSONPath specifying location of sequence_id
-sequence_id = '$.sequence_number'
+table_name   = "foo"
+component_id = "bar_baz/e8c81cbbbeb3967a423bb49e352eed0e"
+sequence_id  = "$.sequence_number" # Optional JSONPath (specifying location of sequence_id)
 
 sequencer = Alephant::Sequencer.create(table_name, sqs_queue_url, sequence_id)
 
 # Data from SQS message
-data = Struct.new(:body).new({:sequence_number => 3})
+json = JSON.generate({ :sequence_number => 3 })
+msg  = Struct.new(:body).new(json)
 
 # Sets last seen id
-sequencer.set_last_seen(data)
+sequencer.set_last_seen(msg)
 
 # Gets last seen id
 sequencer.get_last_seen
 # => 3
 
 # Is the message sequential?
-sequencer.sequential?(data)
+sequencer.sequential?(msg)
 
 # Reset sequence
 sequencer.delete!
