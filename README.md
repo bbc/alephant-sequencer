@@ -31,7 +31,7 @@ table_name   = "foo"
 component_id = "bar_baz/e8c81cbbbeb3967a423bb49e352eed0e"
 sequence_id  = "$.sequence_number" # Optional JSONPath (specifying location of sequence_id)
 
-sequencer = Alephant::Sequencer.create(table_name, sqs_queue_url, sequence_id)
+sequencer = Alephant::Sequencer.create(table_name, component_id, sequence_id)
 
 # Data from SQS message
 json = JSON.generate({ :sequence_number => 3 })
