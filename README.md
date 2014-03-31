@@ -26,8 +26,8 @@ Or install it yourself as:
 ```rb
 require "alephant/sequencer"
 
-# Ensure you check your AWS region configuration before you start
-# For example: AWS.config(region: 'eu-west-1')
+# Ensure you check your AWS region configuration before you start using `AWS.config.region`
+# To set the value use: AWS.config(region: 'eu-west-1')
 
 table_name   = "foo"
 component_id = "bar_baz/e8c81cbbbeb3967a423bb49e352eed0e"
