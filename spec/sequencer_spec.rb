@@ -26,7 +26,7 @@ describe Alephant::Sequencer do
       table.stub(:sequence_exists)
       table.stub(:sequence_for)
       table.stub(:set_sequence_for)
-
+      table.stub(:truncate!)
       table
     end
 
@@ -268,7 +268,18 @@ describe Alephant::Sequencer do
           end
         end
       end
+    end
 
+    describe "#truncate!" do
+      it "deletes all table rows" do
+        table = double()
+        table.stub(:create)
+        table.stub(:sequence_exists)
+        table.should_receive(:truncate!)
+
+        subject = Alephant::Sequencer::Sequencer.new(table, ident, jsonpath)
+        subject.truncate!
+      end
     end
   end
 end
