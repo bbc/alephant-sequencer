@@ -1,8 +1,8 @@
-require 'aws-sdk'
-require 'thread'
-require 'timeout'
+require "aws-sdk"
+require "thread"
+require "timeout"
 
-require 'alephant/logger'
+require "alephant/logger"
 
 module Alephant
   module Sequencer
@@ -47,7 +47,7 @@ module Alephant
 
       def sequence_for(ident)
         rows = batch_get_value_for(ident)
-        rows.count >= 1 ? rows.first['value'].to_i : nil
+        rows.count >= 1 ? rows.first["value"].to_i : nil
       end
 
       def set_sequence_for(ident, value, last_seen_check = nil)
@@ -106,7 +106,7 @@ module Alephant
       end
 
       def batch_get_value_for(ident)
-        table.batch_get(['value'],[ident],batch_get_opts)
+        table.batch_get(["value"],[ident],batch_get_opts)
       end
 
       def unless_exists(key)
