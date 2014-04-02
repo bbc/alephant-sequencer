@@ -12,6 +12,13 @@ module Alephant
 
       attr_reader :table_name
 
+      SCHEMA = {
+        :hash_key => {
+          :key => :string,
+          :value => :string
+        }
+      }
+
       def initialize(table_name, config = DEFAULT_CONFIG)
         @mutex = Mutex.new
         @dynamo_db = AWS::DynamoDB.new
