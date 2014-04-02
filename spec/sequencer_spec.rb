@@ -271,7 +271,7 @@ describe Alephant::Sequencer do
     end
 
     describe "#truncate!" do
-      it "deletes all table rows" do
+      it "verify SequenceTable#truncate!" do
         table = double()
         table.stub(:create)
         table.stub(:sequence_exists)
