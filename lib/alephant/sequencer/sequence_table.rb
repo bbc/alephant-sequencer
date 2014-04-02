@@ -1,21 +1,17 @@
-require 'aws-sdk'
-require 'thread'
-require 'timeout'
+require "aws-sdk"
+require "thread"
+require "timeout"
 
-require 'alephant/logger'
+require "alephant/logger"
+require "alephant/support/dynamodb/table"
 
 module Alephant
   module Sequencer
-    class SequenceTable
+    class SequenceTable < ::Alephant::Support::DynamoDB::Table
       include ::Alephant::Logger
 
       attr_reader :table_name
 
-      TIMEOUT = 120
-      DEFAULT_CONFIG = {
-        :write_units => 5,
-        :read_units => 10,
-      }
       SCHEMA = {
         :hash_key => {
           :key => :string,
@@ -47,7 +43,7 @@ module Alephant
 
       def sequence_for(ident)
         rows = batch_get_value_for(ident)
-        rows.count >= 1 ? rows.first['value'].to_i : nil
+        rows.count >= 1 ? rows.first["value"].to_i : nil
       end
 
       def set_sequence_for(ident, value, last_seen_check = nil)
@@ -78,12 +74,13 @@ module Alephant
       end
 
       private
+
       def put_condition(last_seen_check)
         last_seen_check.nil? ? unless_exists(:key) : if_value(last_seen_check)
       end
 
       def batch_get_value_for(ident)
-        table.batch_get(['value'],[ident],batch_get_opts)
+        table.batch_get(["value"],[ident],batch_get_opts)
       end
 
       def unless_exists(key)

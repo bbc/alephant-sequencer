@@ -42,6 +42,10 @@ module Alephant
         @sequence_table.delete_item!(ident)
       end
 
+      def truncate!
+        @sequence_table.truncate!
+      end
+
       def set_last_seen(msg, last_seen_check = nil)
         seen_id = Sequencer.sequence_id_from(msg, jsonpath)
 
