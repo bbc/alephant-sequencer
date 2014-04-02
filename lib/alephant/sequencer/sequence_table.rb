@@ -3,25 +3,14 @@ require "thread"
 require "timeout"
 
 require "alephant/logger"
+require "alephant/support/dynamodb/table"
 
 module Alephant
   module Sequencer
-    class SequenceTable
+    class SequenceTable < ::Alephant::Support::DynamoDB::Table
       include ::Alephant::Logger
 
       attr_reader :table_name
-
-      TIMEOUT = 120
-      DEFAULT_CONFIG = {
-        :write_units => 5,
-        :read_units => 10,
-      }
-      SCHEMA = {
-        :hash_key => {
-          :key => :string,
-          :value => :string
-        }
-      }
 
       def initialize(table_name, config = DEFAULT_CONFIG)
         @mutex = Mutex.new
@@ -77,29 +66,7 @@ module Alephant
         table.items[ident].delete
       end
 
-      def truncate!
-        batch_delete table_data
-      end
-
       private
-
-      def batch_delete(rows)
-        rows.each_slice(25) { |arr| table.batch_delete(arr) }
-      end
-
-      def table_data
-        table.items.collect do |item|
-          construct_attributes_from item
-        end
-      end
-
-      def construct_attributes_from(item)
-        range_key? ? [item.hash_value, item.range_value.to_i] : item.hash_value
-      end
-
-      def range_key?
-        @range_found ||= table.items.first.range_value
-      end
 
       def put_condition(last_seen_check)
         last_seen_check.nil? ? unless_exists(:key) : if_value(last_seen_check)
