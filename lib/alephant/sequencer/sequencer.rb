@@ -5,16 +5,17 @@ require 'alephant/logger'
 module Alephant
   module Sequencer
     class Sequencer
-      include ::Alephant::Logger
-      attr_reader :ident, :jsonpath
+      include Logger
+      attr_reader :ident, :jsonpath, :keep_all
 
-      def initialize(sequence_table, id, sequence_path)
+      def initialize(sequence_table, id, sequence_path, keep_all = true)
         @sequence_table = sequence_table
         @sequence_table.create
 
-        @exists = exists?
+        @keep_all = keep_all
+        @exists   = exists?
         @jsonpath = sequence_path
-        @ident = id
+        @ident    = id
       end
 
       def sequential?(msg)
@@ -26,10 +27,12 @@ module Alephant
       end
 
       def sequence(msg, &block)
-        block.call(msg)
-
         last_seen_id = get_last_seen
-        if (last_seen_id || 0) < Sequencer.sequence_id_from(msg, jsonpath)
+        sequential = ((last_seen_id || 0) < Sequencer.sequence_id_from(msg, jsonpath))
+
+        block.call(msg) if (sequential || keep_all)
+
+        if sequential
           set_last_seen(msg, last_seen_id)
         else
           logger.info("Sequencer#sequence nonsequential message for #{ident}")

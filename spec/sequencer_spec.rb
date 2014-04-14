@@ -54,6 +54,15 @@ describe Alephant::Sequencer do
         m
       end
 
+      let(:an_uncalled_proc) do
+        a_block = double()
+        a_block.should_not_receive(:called).with(message)
+
+        Proc.new do |msg|
+          a_block.called(msg)
+        end
+      end
+
       let(:a_proc) do
         a_block = double()
         a_block.should_receive(:called).with(message)
@@ -137,6 +146,19 @@ describe Alephant::Sequencer do
 
           subject = Alephant::Sequencer::Sequencer.new(sequence_table, ident, jsonpath)
           subject.sequence(message, &a_proc)
+        end
+
+        context "keep_all is false" do
+          let(:keep_all) { false }
+          it "should not call the passed block with msg" do
+            subject = Alephant::Sequencer::Sequencer.new(
+              sequence_table,
+              ident,
+              jsonpath,
+              keep_all
+            )
+            subject.sequence(message, &an_uncalled_proc)
+          end
         end
       end
 
