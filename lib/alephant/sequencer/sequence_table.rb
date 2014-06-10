@@ -10,119 +10,88 @@ module Alephant
     class SequenceTable < ::Alephant::Support::DynamoDB::Table
       include ::Alephant::Logger
 
-      attr_reader :table_name
+      attr_reader :table_name, :client
 
-      SCHEMA = {
-        :hash_key => {
-          :key => :string,
-          :value => :string
-        }
-      }
-
-      def initialize(table_name, config = DEFAULT_CONFIG)
-        @mutex = Mutex.new
-        @dynamo_db = AWS::DynamoDB.new
+      def initialize(table_name)
+        @mutex      = Mutex.new
+        @client     = AWS::DynamoDB::Client::V20120810.new
         @table_name = table_name
-        @config = config
-      end
-
-      def create
-        @mutex.synchronize do
-          ensure_table_exists
-          ensure_table_active
-        end
-      end
-
-      def table
-        @table ||= @dynamo_db.tables[@table_name]
       end
 
       def sequence_exists(ident)
-        !(table.items.where(:key => ident) == 0)
+        if ident.nil?
+          return false
+        end
+
+        !(client.get_item(
+          item_payload(ident)
+        ).length == 0)
       end
 
       def sequence_for(ident)
-        rows = batch_get_value_for(ident)
-        rows.count >= 1 ? rows.first["value"].to_i : nil
+        data = client.get_item(
+          item_payload(ident)
+        )
+
+        data.length > 0 ? data[:item]["value"][:n].to_i : 0
       end
 
       def set_sequence_for(ident, value, last_seen_check = nil)
         begin
+
+          current_sequence = last_seen_check.nil? ? sequence_for(ident) : last_seen_check
           @mutex.synchronize do
-            table.items.put(
-              {:key => ident, :value => value },
-              put_condition(last_seen_check)
-            )
+
+            client.put_item({
+              :table_name => table_name,
+              :item => {
+                'key' => {
+                  'S' => ident
+                },
+                'value' => {
+                  'N' => value.to_s
+                }
+              },
+              :expected => {
+                'key' => {
+                  :comparison_operator => 'NULL'
+                },
+                'value' => {
+                  :comparison_operator => 'GE',
+                  :attribute_value_list => [
+                    { 'N' => current_sequence.to_s }
+                  ]
+                }
+              },
+              :conditional_operator => 'OR'
+            })
           end
 
           logger.info("SequenceTable#set_sequence_for: #{value} for #{ident} success!")
         rescue AWS::DynamoDB::Errors::ConditionalCheckFailedException => e
-          logger.warn("SequenceTable#set_sequence_for: #{ident} #{e.message}")
-          last_seen_check = sequence_for(ident)
-
-          unless last_seen_check >= value
-            logger.info("SequenceTable#set_sequence_for: #{ident} trying again!")
-            set_sequence_for(ident, value, last_seen_check)
-          else
-            logger.warn("SequenceTable#set_sequence_for: #{ident} outdated!")
-          end
+          logger.warn("SequenceTable#set_sequence_for: (Value to put: #{value}, existing: #{current_sequence}) #{ident} outdated!")
         end
       end
 
       def delete_item!(ident)
-        table.items[ident].delete
+        client.delete_item(
+          item_payload(ident)
+        )
       end
 
       private
 
-      def put_condition(last_seen_check)
-        last_seen_check.nil? ? unless_exists(:key) : if_value(last_seen_check)
+      def item_payload(ident)
+        {
+          :table_name => table_name,
+          :key => {
+            'key' => {
+              'S' => ident.to_s
+            }
+          }
+        }
       end
 
-      def batch_get_value_for(ident)
-        table.batch_get(["value"],[ident],batch_get_opts)
-      end
-
-      def unless_exists(key)
-        { :unless_exists => key }
-      end
-
-      def if_value(value)
-        { :if => { :value => value.to_i } }
-      end
-
-      def batch_get_opts
-        { :consistent_read => true }
-      end
-
-      def ensure_table_exists
-        create_dynamodb_table unless table.exists?
-      end
-
-      def ensure_table_active
-        sleep_until_table_active unless table_active?
-      end
-
-      def create_dynamodb_table
-        @table = @dynamo_db.tables.create(
-          @table_name,
-          @config[:read_units],
-          @config[:write_units],
-          SCHEMA
-        )
-      end
-
-      def table_active?
-        table.status == :active
-      end
-
-      def sleep_until_table_active
-        begin
-          Timeout::timeout(TIMEOUT) do
-            sleep 1 until table_active?
-          end
-        end
-      end
     end
   end
 end

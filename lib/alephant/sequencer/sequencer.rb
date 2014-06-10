@@ -10,7 +10,6 @@ module Alephant
 
       def initialize(sequence_table, id, sequence_path, keep_all = true)
         @sequence_table = sequence_table
-        @sequence_table.create
 
         @keep_all = keep_all
         @exists   = exists?
