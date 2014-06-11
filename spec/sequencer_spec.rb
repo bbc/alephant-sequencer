@@ -38,13 +38,6 @@ describe Alephant::Sequencer do
         expect(subject.ident).to eq(ident)
       end
 
-      it "calls create on sequence_table" do
-        table = double()
-        table.stub(:sequence_exists)
-        table.should_receive(:create)
-
-        Alephant::Sequencer::Sequencer.new(table, ident, jsonpath)
-      end
     end
 
     describe "#sequence(msg, &block)" do
