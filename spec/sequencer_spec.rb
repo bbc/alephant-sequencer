@@ -249,7 +249,7 @@ describe Alephant::Sequencer do
           let(:id_value) { 2 }
 
           it "is true" do
-            expect(subject.sequential?(data)).to be_true
+            expect(subject.sequential?(data)).to be
           end
         end
 
@@ -257,7 +257,7 @@ describe Alephant::Sequencer do
           let(:id_value) { 0 }
 
           it "is false" do
-            expect(subject.sequential?(data)).to be_false
+            expect(subject.sequential?(data)).to be false
           end
         end
       end
@@ -271,7 +271,7 @@ describe Alephant::Sequencer do
           let(:id_value) { 2 }
 
           it "is true" do
-            expect(subject.sequential?(data)).to be_true
+            expect(subject.sequential?(data)).to be
           end
         end
 
@@ -279,7 +279,7 @@ describe Alephant::Sequencer do
           let(:id_value) { 0 }
 
           it "is false" do
-            expect(subject.sequential?(data)).to be_false
+            expect(subject.sequential?(data)).to be false
           end
         end
       end
