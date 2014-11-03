@@ -57,8 +57,8 @@ module Alephant
         )
       end
 
-      def get_last_seen
-        @sequence_table.sequence_for(ident)
+      def get_last_seen(key = ident)
+        @sequence_table.sequence_for(key)
       end
 
       def self.sequence_id_from(msg, path)
