@@ -34,7 +34,7 @@ module Alephant
         if sequential
           set_last_seen(msg, last_seen_id)
         else
-          logger.info("Sequencer#sequence nonsequential message for #{ident}")
+          logger.info("Sequencer#sequence nonsequential message for #{ident} (last_seen_id: #{last_seen_id})")
         end
       end
 
