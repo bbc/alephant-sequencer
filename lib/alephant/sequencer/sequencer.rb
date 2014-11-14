@@ -1,5 +1,4 @@
 require 'jsonpath'
-
 require 'alephant/logger'
 
 module Alephant
@@ -15,6 +14,7 @@ module Alephant
         @exists   = exists?
         @jsonpath = sequence_path
         @ident    = id
+        logger.info("Sequencer#initialize: table: #{sequence_table}, jsonpath: #{sequence_path}, id: #{id}")
       end
 
       def sequential?(msg)

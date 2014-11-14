@@ -4,12 +4,12 @@ require "timeout"
 
 require "alephant/logger"
 require "alephant/support/dynamodb/table"
+require "alephant/logger"
 
 module Alephant
   module Sequencer
     class SequenceTable < ::Alephant::Support::DynamoDB::Table
-      include ::Alephant::Logger
-
+      include Logger
       attr_reader :table_name, :client
 
       def initialize(table_name)
