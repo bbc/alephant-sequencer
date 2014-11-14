@@ -25,7 +25,7 @@ describe Alephant::Sequencer do
       table.stub(:create)
       table.stub(:sequence_exists)
       table.stub(:sequence_for)
-      table.stub(:set_sequence_for)
+      table.stub(:update_sequence_id)
       table.stub(:truncate!)
       table
     end
@@ -203,12 +203,12 @@ describe Alephant::Sequencer do
           .and_return(last_seen)
       end
 
-      it "calls set_sequence_for(ident, last_seen)" do
+      it "calls update_sequence_id(ident, last_seen)" do
         table = double()
         table.stub(:sequence_exists)
         table.stub(:create)
         table.stub(:sequence_for)
-        table.should_receive(:set_sequence_for)
+        table.should_receive(:update_sequence_id)
           .with(ident, last_seen, nil)
 
         Alephant::Sequencer::Sequencer

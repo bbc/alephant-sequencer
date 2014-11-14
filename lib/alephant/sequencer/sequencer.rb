@@ -51,7 +51,7 @@ module Alephant
       def set_last_seen(msg, last_seen_check = nil)
         seen_id = Sequencer.sequence_id_from(msg, jsonpath)
 
-        @sequence_table.set_sequence_for(
+        @sequence_table.update_sequence_id(
           ident, seen_id,
           (exists? ? last_seen_check : nil)
         )
