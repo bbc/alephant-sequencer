@@ -25,7 +25,7 @@ module Alephant
         @exists || @sequence_table.sequence_exists(ident)
       end
 
-      def sequence(msg, &block)
+      def validate(msg, &block)
         last_seen_id = get_last_seen
         sequential = ((last_seen_id || 0) < Sequencer.sequence_id_from(msg, jsonpath))
 
