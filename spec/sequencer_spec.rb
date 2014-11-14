@@ -40,7 +40,7 @@ describe Alephant::Sequencer do
 
     end
 
-    describe "#sequence(msg, &block)" do
+    describe "#validate(msg, &block)" do
       let(:message) do
         m = double()
         m.stub(:body)
@@ -71,7 +71,7 @@ describe Alephant::Sequencer do
 
       it "should call the passed block with msg" do
         subject = Alephant::Sequencer::Sequencer.new(sequence_table, ident, jsonpath)
-        subject.sequence(message, &a_proc)
+        subject.validate(message, &a_proc)
       end
 
       context "last_seen_id is nil" do
@@ -93,7 +93,7 @@ describe Alephant::Sequencer do
             .with(message, nil)
 
           subject = Alephant::Sequencer::Sequencer.new(sequence_table, ident, jsonpath)
-          subject.sequence(message, &a_proc)
+          subject.validate(message, &a_proc)
         end
       end
 
@@ -115,7 +115,7 @@ describe Alephant::Sequencer do
             .should_not_receive(:set_last_seen)
 
           subject = Alephant::Sequencer::Sequencer.new(sequence_table, ident, jsonpath)
-          subject.sequence(message, &a_proc)
+          subject.validate(message, &a_proc)
         end
       end
 
@@ -138,7 +138,7 @@ describe Alephant::Sequencer do
             .should_not_receive(:set_last_seen)
 
           subject = Alephant::Sequencer::Sequencer.new(sequence_table, ident, jsonpath)
-          subject.sequence(message, &a_proc)
+          subject.validate(message, &a_proc)
         end
 
         context "keep_all is false" do
@@ -150,7 +150,7 @@ describe Alephant::Sequencer do
               jsonpath,
               keep_all
             )
-            subject.sequence(message, &an_uncalled_proc)
+            subject.validate(message, &an_uncalled_proc)
           end
         end
       end
@@ -174,7 +174,7 @@ describe Alephant::Sequencer do
             .with(message, stubbed_last_seen)
 
           subject = Alephant::Sequencer::Sequencer.new(sequence_table, ident, jsonpath)
-          subject.sequence(message, &a_proc)
+          subject.validate(message, &a_proc)
         end
       end
     end
