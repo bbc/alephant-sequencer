@@ -1,5 +1,4 @@
 require 'jsonpath'
-
 require 'alephant/logger'
 
 module Alephant
@@ -15,6 +14,7 @@ module Alephant
         @exists   = exists?
         @jsonpath = sequence_path
         @ident    = id
+        logger.info("Sequencer#initialize: table: #{sequence_table}, jsonpath: #{sequence_path}, id: #{id}")
       end
 
       def sequential?(msg)
@@ -29,12 +29,12 @@ module Alephant
         last_seen_id = get_last_seen
         sequential = ((last_seen_id || 0) < Sequencer.sequence_id_from(msg, jsonpath))
 
-        block.call(msg) if (sequential || keep_all)
+        block.call if (sequential || keep_all)
 
         if sequential
           set_last_seen(msg, last_seen_id)
         else
-          logger.info("Sequencer#sequence nonsequential message for #{ident}")
+          logger.info("Sequencer#sequence nonsequential message for #{ident} (last_seen_id: #{last_seen_id})")
         end
       end
 
@@ -51,7 +51,7 @@ module Alephant
       def set_last_seen(msg, last_seen_check = nil)
         seen_id = Sequencer.sequence_id_from(msg, jsonpath)
 
-        @sequence_table.set_sequence_for(
+        @sequence_table.update_sequence_id(
           ident, seen_id,
           (exists? ? last_seen_check : nil)
         )

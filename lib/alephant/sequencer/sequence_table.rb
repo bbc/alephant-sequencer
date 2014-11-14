@@ -8,8 +8,7 @@ require "alephant/support/dynamodb/table"
 module Alephant
   module Sequencer
     class SequenceTable < ::Alephant::Support::DynamoDB::Table
-      include ::Alephant::Logger
-
+      include Logger
       attr_reader :table_name, :client
 
       def initialize(table_name)
@@ -36,7 +35,7 @@ module Alephant
         data.length > 0 ? data[:item]["value"][:n].to_i : 0
       end
 
-      def set_sequence_for(ident, value, last_seen_check = nil)
+      def update_sequence_id(ident, value, last_seen_check = nil)
         begin
 
           current_sequence = last_seen_check.nil? ? sequence_for(ident) : last_seen_check
@@ -67,9 +66,9 @@ module Alephant
             })
           end
 
-          logger.info("SequenceTable#set_sequence_for: #{value} for #{ident} success!")
-        rescue AWS::DynamoDB::Errors::ConditionalCheckFailedException => e
-          logger.warn("SequenceTable#set_sequence_for: (Value to put: #{value}, existing: #{current_sequence}) #{ident} outdated!")
+          logger.info("SequenceTable#update_sequence_id: with new value #{value} for #{ident} success!")
+        rescue AWS::DynamoDB::Errors::ConditionalCheckFailedException
+          logger.warn("SequenceTable#update_sequence_id: (Value to put: #{value}, existing: #{current_sequence}) #{ident} outdated!")
         end
       end
 

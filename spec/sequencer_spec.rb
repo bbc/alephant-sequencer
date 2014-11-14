@@ -25,7 +25,7 @@ describe Alephant::Sequencer do
       table.stub(:create)
       table.stub(:sequence_exists)
       table.stub(:sequence_for)
-      table.stub(:set_sequence_for)
+      table.stub(:update_sequence_id)
       table.stub(:truncate!)
       table
     end
@@ -58,10 +58,10 @@ describe Alephant::Sequencer do
 
       let(:a_proc) do
         a_block = double()
-        a_block.should_receive(:called).with(message)
+        a_block.should_receive(:called)
 
-        Proc.new do |msg|
-          a_block.called(msg)
+        Proc.new do
+          a_block.called
         end
       end
 
@@ -69,7 +69,7 @@ describe Alephant::Sequencer do
       let(:stubbed_seen_high) { 3 }
       let(:stubbed_seen_low)  { 1 }
 
-      it "should call the passed block with msg" do
+      it "should call the passed block" do
         subject = Alephant::Sequencer::Sequencer.new(sequence_table, ident, jsonpath)
         subject.validate(message, &a_proc)
       end
@@ -203,12 +203,12 @@ describe Alephant::Sequencer do
           .and_return(last_seen)
       end
 
-      it "calls set_sequence_for(ident, last_seen)" do
+      it "calls update_sequence_id(ident, last_seen)" do
         table = double()
         table.stub(:sequence_exists)
         table.stub(:create)
         table.stub(:sequence_for)
-        table.should_receive(:set_sequence_for)
+        table.should_receive(:update_sequence_id)
           .with(ident, last_seen, nil)
 
         Alephant::Sequencer::Sequencer
