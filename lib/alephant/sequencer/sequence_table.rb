@@ -68,7 +68,7 @@ module Alephant
           end
 
           logger.info("SequenceTable#set_sequence_for: #{value} for #{ident} success!")
-        rescue AWS::DynamoDB::Errors::ConditionalCheckFailedException => e
+        rescue AWS::DynamoDB::Errors::ConditionalCheckFailedException
           logger.warn("SequenceTable#set_sequence_for: (Value to put: #{value}, existing: #{current_sequence}) #{ident} outdated!")
         end
       end
