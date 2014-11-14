@@ -4,7 +4,6 @@ require "timeout"
 
 require "alephant/logger"
 require "alephant/support/dynamodb/table"
-require "alephant/logger"
 
 module Alephant
   module Sequencer
