@@ -29,7 +29,7 @@ module Alephant
         last_seen_id = get_last_seen
         sequential = ((last_seen_id || 0) < Sequencer.sequence_id_from(msg, jsonpath))
 
-        block.call(msg) if (sequential || keep_all)
+        block.call if (sequential || keep_all)
 
         if sequential
           set_last_seen(msg, last_seen_id)
