@@ -66,7 +66,6 @@ module Alephant
             })
           end
 
-          logger.metric(:name => "SequencerSuccessfulConditionalChecks", :unit => "Count", :value => 1)
           logger.info("SequenceTable#update_sequence_id: with new value #{value} for #{ident} success!")
         rescue AWS::DynamoDB::Errors::ConditionalCheckFailedException
           logger.metric(:name => "SequencerFailedConditionalChecks", :unit => "Count", :value => 1)

@@ -32,7 +32,6 @@ module Alephant
         block.call if (sequential || keep_all)
 
         if sequential
-          logger.metric(:name => "SequencerSequentialMessageCount", :unit => "Count", :value => 1)
           set_last_seen(msg, last_seen_id)
         else
           logger.metric(:name => "SequencerNonSequentialMessageCount", :unit => "Count", :value => 1)
