@@ -68,7 +68,10 @@ module Alephant
 
           logger.info("SequenceTable#update_sequence_id: with new value #{value} for #{ident} success!")
         rescue AWS::DynamoDB::Errors::ConditionalCheckFailedException
-          logger.metric(:name => "SequencerFailedConditionalChecks", :unit => "Count", :value => 1)
+          logger.metric(
+            "SequencerFailedConditionalChecks",
+            metric_opts
+          )
           logger.warn("SequenceTable#update_sequence_id: (Value to put: #{value}, existing: #{current_sequence}) #{ident} outdated!")
         end
       end
@@ -80,6 +83,16 @@ module Alephant
       end
 
       private
+
+      def metric_opts
+        {
+          :dimensions => {
+            :module   => "Alephant",
+            :class    => "Sequencer",
+            :function => "update_sequence_id"
+          }
+        }
+      end
 
       def item_payload(ident)
         {

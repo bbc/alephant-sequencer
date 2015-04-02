@@ -34,7 +34,10 @@ module Alephant
         if sequential
           set_last_seen(msg, last_seen_id)
         else
-          logger.metric(:name => "SequencerNonSequentialMessageCount", :unit => "Count", :value => 1)
+          logger.metric(
+            "SequencerNonSequentialMessageCount",
+            metric_opts
+          )
           logger.info("Sequencer#sequence nonsequential message for #{ident} (last_seen_id: #{last_seen_id})")
         end
       end
@@ -64,6 +67,16 @@ module Alephant
 
       def self.sequence_id_from(msg, path)
         JsonPath.on(msg.body, path).first.to_i
+      end
+
+      def metric_opts
+        {
+          :dimensions => {
+            :module   => "Alephant",
+            :class    => "Sequencer",
+            :function => "validate"
+          }
+        }
       end
     end
   end
