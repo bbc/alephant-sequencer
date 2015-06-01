@@ -6,8 +6,8 @@ require 'alephant/sequencer/version'
 Gem::Specification.new do |spec|
   spec.name          = "alephant-sequencer"
   spec.version       = Alephant::Sequencer::VERSION
-  spec.authors       = ["Robert Kenny"]
-  spec.email         = ["kenoir@gmail.com"]
+  spec.authors       = ["BBC News"]
+  spec.email         = ["FutureMediaNewsRubyGems@bbc.co.uk"]
   spec.summary       = %q{Adds sequencing functionality to Alephant.}
   spec.homepage      = ""
   spec.license       = "MIT"
