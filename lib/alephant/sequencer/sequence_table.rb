@@ -75,7 +75,7 @@ module Alephant
         rescue AWS::DynamoDB::Errors::ConditionalCheckFailedException
           logger.metric "SequencerFailedConditionalChecks"
           logger.error(
-            "event"                => "DynamoConditionalCheckFailed",
+            "event"                => "DynamoDBConditionalCheckFailed",
             "newSequenceValue"     => value,
             "currentSequenceValue" => current_sequence,
             "id"                   => ident,
