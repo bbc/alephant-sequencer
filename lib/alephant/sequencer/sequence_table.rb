@@ -66,10 +66,24 @@ module Alephant
             })
           end
 
-          logger.info("SequenceTable#update_sequence_id: with new value #{value} for #{ident} success!")
+          logger.info(
+            "event"  => "SequenceIdUpdated",
+            "id"     => ident,
+            "value"  => value,
+            "method" => "#{self.class}#update_sequence_id"
+          )
         rescue AWS::DynamoDB::Errors::ConditionalCheckFailedException
           logger.metric "SequencerFailedConditionalChecks"
-          logger.warn("SequenceTable#update_sequence_id: (Value to put: #{value}, existing: #{current_sequence}) #{ident} outdated!")
+          logger.error(
+            "event"                => "DynamoDBConditionalCheckFailed",
+            "newSequenceValue"     => value,
+            "currentSequenceValue" => current_sequence,
+            "id"                   => ident,
+            "class"                => e.class,
+            "message"              => e.message,
+            "backtrace"            => e.backtrace.join("\n"),
+            "method"               => "#{self.class}#update_sequence_id"
+          )
         end
       end
 

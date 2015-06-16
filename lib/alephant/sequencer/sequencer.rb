@@ -14,7 +14,13 @@ module Alephant
         @exists   = exists?
         @jsonpath = sequence_path
         @ident    = id
-        logger.info("Sequencer#initialize: table: #{sequence_table}, jsonpath: #{sequence_path}, id: #{id}")
+        logger.info(
+          "event"         => "SequencerInitialized",
+          "sequenceTable" => sequence_table,
+          "jsonPath"      => sequence_path,
+          "id"            => id,
+          "method"        => "#{self.class}#initialize"
+        )
       end
 
       def sequential?(msg)
@@ -35,14 +41,24 @@ module Alephant
           set_last_seen(msg, last_seen_id)
         else
           logger.metric "SequencerNonSequentialMessageCount"
-          logger.info("Sequencer#sequence nonsequential message for #{ident} (last_seen_id: #{last_seen_id})")
+          logger.info(
+            "event"      => "NonSequentialMessageReceived",
+            "id"         => ident,
+            "lastSeenId" => last_seen_id,
+            "method"     => "#{self.class}#validate"
+          )
         end
       end
 
       def delete!
-        logger.info("Sequencer#delete!: #{ident}")
         @exists = false
-        @sequence_table.delete_item!(ident)
+        @sequence_table.delete_item!(ident).tap do
+          logger.info(
+            "event"  => "SequenceIdDeleted",
+            "id"     => ident,
+            "method" => "#{self.class}#delete!"
+          )
+        end
       end
 
       def truncate!
