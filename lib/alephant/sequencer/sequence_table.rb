@@ -66,6 +66,7 @@ module Alephant
             })
           end
 
+          logger.metric("SequencerFailedConditionalChecks", :value => 0)
           logger.info(
             "event"  => "SequenceIdUpdated",
             "id"     => ident,
