@@ -17,11 +17,11 @@ describe Alephant::Sequencer do
   end
 
   describe Alephant::Sequencer::Sequencer do
-    let(:data)      { double() }
+    let(:data)      { double }
     let(:last_seen) { 42 }
 
     def sequence_table
-      table = double()
+      table = double
       table.stub(:create)
       table.stub(:sequence_exists)
       table.stub(:sequence_for)
@@ -37,30 +37,29 @@ describe Alephant::Sequencer do
         expect(subject.jsonpath).to eq(jsonpath)
         expect(subject.ident).to eq(ident)
       end
-
     end
 
     describe "#validate(msg, &block)" do
       let(:message) do
-        m = double()
+        m = double
         m.stub(:body)
         m
       end
 
       let(:an_uncalled_proc) do
-        a_block = double()
+        a_block = double
         a_block.should_not_receive(:called).with(message)
 
-        Proc.new do |msg|
+        proc do |msg|
           a_block.called(msg)
         end
       end
 
       let(:a_proc) do
-        a_block = double()
+        a_block = double
         a_block.should_receive(:called)
 
-        Proc.new do
+        proc do
           a_block.called
         end
       end
@@ -181,7 +180,7 @@ describe Alephant::Sequencer do
 
     describe "#get_last_seen" do
       it "returns sequence_table.sequence_for(ident)" do
-        table = double()
+        table = double
         table.stub(:sequence_exists)
         table.stub(:create)
         table.should_receive(:sequence_for)
@@ -204,7 +203,7 @@ describe Alephant::Sequencer do
       end
 
       it "calls update_sequence_id(ident, last_seen)" do
-        table = double()
+        table = double
         table.stub(:sequence_exists)
         table.stub(:create)
         table.stub(:sequence_for)
@@ -287,7 +286,7 @@ describe Alephant::Sequencer do
 
     describe "#truncate!" do
       it "verify SequenceTable#truncate!" do
-        table = double()
+        table = double
         table.stub(:create)
         table.stub(:sequence_exists)
         table.should_receive(:truncate!)
