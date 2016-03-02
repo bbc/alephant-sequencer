@@ -1,7 +1,7 @@
 # coding: utf-8
-lib = File.expand_path('../lib', __FILE__)
+lib = File.expand_path("../lib", __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'alephant/sequencer/version'
+require "alephant/sequencer/version"
 
 Gem::Specification.new do |spec|
   spec.name          = "alephant-sequencer"
@@ -28,8 +28,9 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "pry-remote"
   spec.add_development_dependency "pry-nav"
 
-  spec.add_runtime_dependency 'aws-sdk', '~> 1.0'
-  spec.add_runtime_dependency 'alephant-logger'
-  spec.add_runtime_dependency 'alephant-support'
-  spec.add_runtime_dependency 'jsonpath'
+  spec.add_runtime_dependency "aws-sdk", "~> 1.0"
+  spec.add_runtime_dependency "alephant-logger"
+  spec.add_runtime_dependency "alephant-support"
+  spec.add_runtime_dependency "jsonpath"
+  spec.add_runtime_dependency "dalli-elasticache"
 end
