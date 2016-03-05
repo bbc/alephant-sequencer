@@ -14,6 +14,7 @@ describe Alephant::Sequencer do
       expect_any_instance_of(Dalli::ElastiCache).to receive(:client).and_return(Dalli::Client.new)
 
       expect_any_instance_of(Alephant::Sequencer::SequenceTable).to receive(:initialize)
+      expect_any_instance_of(Alephant::Sequencer::SequenceTable).to receive(:sequence_exists)
       expect(subject.create(:table_name, ident, jsonpath, keep_all, config)).to be_a Alephant::Sequencer::Sequencer
     end
   end
@@ -184,6 +185,27 @@ describe Alephant::Sequencer do
           expect_any_instance_of(described_class).to receive(:set_last_seen).with(message, stubbed_last_seen)
 
           expect(sequence_table).to receive(:sequence_exists)
+
+          instance.validate(message, &a_proc)
+        end
+      end
+
+      context "values already in cache" do
+        before(:each) do
+          expect(message).to receive(:body).and_return("sequence_id" => 5)
+
+          expect_any_instance_of(Dalli::ElastiCache).to receive(:initialize)
+          expect_any_instance_of(Dalli::ElastiCache).to receive(:client).and_return(Dalli::Client.new)
+
+          expect_any_instance_of(Dalli::Client).to receive(:get).twice.with("ident").and_return(stubbed_last_seen)
+          expect_any_instance_of(Dalli::Client).to_not receive(:set)
+        end
+
+        it "should read values from cache and not database" do
+          expect(sequence_table).to_not receive(:sequence_for)
+          expect(sequence_table).to_not receive(:sequence_exists)
+
+          expect_any_instance_of(described_class).to receive(:set_last_seen).with(message, stubbed_last_seen)
 
           instance.validate(message, &a_proc)
         end

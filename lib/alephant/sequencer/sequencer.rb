@@ -12,9 +12,9 @@ module Alephant
 
         @cache    = cache
         @keep_all = keep_all
+        @ident    = id
         @exists   = exists?
         @jsonpath = sequence_path
-        @ident    = id
         logger.info(
           "event"         => "SequencerInitialized",
           "sequenceTable" => sequence_table,
