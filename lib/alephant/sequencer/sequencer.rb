@@ -1,24 +1,25 @@
-require 'jsonpath'
-require 'alephant/logger'
+require "jsonpath"
+require "alephant/logger"
 
 module Alephant
   module Sequencer
     class Sequencer
       include Logger
-      attr_reader :ident, :jsonpath, :keep_all
+      attr_reader :ident, :jsonpath, :keep_all, :cache
 
-      def initialize(sequence_table, id, sequence_path, keep_all = true)
+      def initialize(sequence_table, opts = {})
         @sequence_table = sequence_table
 
-        @keep_all = keep_all
+        @cache    = opts[:cache]
+        @keep_all = opts[:keep_all]
+        @ident    = opts[:id]
         @exists   = exists?
-        @jsonpath = sequence_path
-        @ident    = id
+        @jsonpath = opts[:jsonpath]
         logger.info(
           "event"         => "SequencerInitialized",
           "sequenceTable" => sequence_table,
-          "jsonPath"      => sequence_path,
-          "id"            => id,
+          "jsonPath"      => @jsonpath,
+          "id"            => @ident,
           "method"        => "#{self.class}#initialize"
         )
       end
@@ -28,7 +29,9 @@ module Alephant
       end
 
       def exists?
-        @exists || @sequence_table.sequence_exists(ident)
+        @exists || cache.get(ident) do
+          @sequence_table.sequence_exists(ident)
+        end
       end
 
       def validate(msg, &block)
@@ -75,7 +78,9 @@ module Alephant
       end
 
       def get_last_seen(key = ident)
-        @sequence_table.sequence_for(key)
+        cache.get(key) do
+          @sequence_table.sequence_for(key)
+        end
       end
 
       def self.sequence_id_from(msg, path)
