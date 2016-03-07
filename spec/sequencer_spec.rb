@@ -7,6 +7,14 @@ describe Alephant::Sequencer do
   let(:keep_all) { true }
   let(:config) { { "elasticache_config_endpoint" => "/foo" } }
   let(:cache) { Alephant::Sequencer::SequenceCache.new(config) }
+  let(:opts) {
+    {
+      :id => ident,
+      :jsonpath => jsonpath,
+      :keep_all => keep_all,
+      :cache => cache
+    }
+  }
 
   describe ".create" do
     it "should return a Sequencer" do
@@ -17,7 +25,7 @@ describe Alephant::Sequencer do
       expect_any_instance_of(Alephant::Sequencer::SequenceTable).to receive(:sequence_exists)
 
       opts = {
-        :ident => ident,
+        :id => ident,
         :jsonpath => jsonpath,
         :keep_all => keep_all,
         :config => config
@@ -30,7 +38,7 @@ describe Alephant::Sequencer do
       expect_any_instance_of(Alephant::Sequencer::SequenceTable).to receive(:sequence_exists)
 
       opts = {
-        :ident => ident
+        :id => ident
       }
 
       instance = subject.create(:table_name, opts)
@@ -49,7 +57,7 @@ describe Alephant::Sequencer do
 
     describe "#initialize" do
       subject (:instance) {
-        described_class.new(sequence_table, ident, jsonpath, keep_all, cache)
+        described_class.new(sequence_table, opts)
       }
 
       it "sets @jsonpath, @ident" do
@@ -91,7 +99,7 @@ describe Alephant::Sequencer do
       let(:stubbed_seen_low)  { 1 }
 
       subject (:instance) {
-        described_class.new(sequence_table, ident, jsonpath, keep_all, cache)
+        described_class.new(sequence_table, opts)
       }
 
       it "should call the passed block" do
@@ -180,13 +188,14 @@ describe Alephant::Sequencer do
           it "should not call the passed block with msg" do
             expect(sequence_table).to receive(:sequence_exists)
 
-            instance = described_class.new(
-              sequence_table,
-              ident,
-              jsonpath,
-              keep_all,
-              cache
-            )
+            opts = {
+              :id => ident,
+              :jsonpath => jsonpath,
+              :keep_all => keep_all,
+              :cache => cache
+            }
+
+            instance = described_class.new(sequence_table, opts)
             instance.validate(message, &an_uncalled_proc)
           end
         end
@@ -238,7 +247,7 @@ describe Alephant::Sequencer do
 
     describe "#get_last_seen" do
       subject (:instance) {
-        described_class.new(sequence_table, ident, jsonpath, keep_all, cache)
+        described_class.new(sequence_table, opts)
       }
 
       it "returns sequence_table.sequence_for(ident)" do
@@ -270,7 +279,7 @@ describe Alephant::Sequencer do
       end
 
       subject (:instance) {
-        described_class.new(sequence_table, ident, jsonpath, keep_all, cache)
+        described_class.new(sequence_table, opts)
       }
 
       it "calls update_sequence_id(ident, last_seen)" do
@@ -308,7 +317,7 @@ describe Alephant::Sequencer do
       end
 
       subject (:instance) {
-        described_class.new(sequence_table, ident, jsonpath, keep_all, cache)
+        described_class.new(sequence_table, opts)
       }
 
       context "jsonpath = '$.sequence_id'" do
@@ -354,7 +363,7 @@ describe Alephant::Sequencer do
 
     describe "#truncate!" do
       subject (:instance) {
-        described_class.new(sequence_table, ident, jsonpath, keep_all, cache)
+        described_class.new(sequence_table, opts)
       }
 
       it "verify SequenceTable#truncate!" do

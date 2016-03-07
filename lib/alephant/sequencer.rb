@@ -14,12 +14,18 @@ module Alephant
         :config => {}
       }
 
-      opts = defaults.merge(opts)
+      opts = defaults.merge(opts).tap do |opts|
+        opts[:cache] = self.cache(opts[:config])
+      end
 
       @@sequence_tables[table_name] ||= SequenceTable.new(table_name)
-      @cache ||= SequenceCache.new(opts[:config])
-      Sequencer.new(@@sequence_tables[table_name], opts[:ident], opts[:jsonpath], opts[:keep_all], @cache)
+      Sequencer.new(@@sequence_tables[table_name], opts)
     end
 
+    private
+
+    def self.cache(config)
+      @cache ||= SequenceCache.new(config)
+    end
   end
 end

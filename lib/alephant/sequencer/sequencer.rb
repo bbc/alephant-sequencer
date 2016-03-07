@@ -7,19 +7,19 @@ module Alephant
       include Logger
       attr_reader :ident, :jsonpath, :keep_all, :cache
 
-      def initialize(sequence_table, id, sequence_path, keep_all, cache)
+      def initialize(sequence_table, opts = {})
         @sequence_table = sequence_table
 
-        @cache    = cache
-        @keep_all = keep_all
-        @ident    = id
+        @cache    = opts[:cache]
+        @keep_all = opts[:keep_all]
+        @ident    = opts[:id]
         @exists   = exists?
-        @jsonpath = sequence_path
+        @jsonpath = opts[:jsonpath]
         logger.info(
           "event"         => "SequencerInitialized",
           "sequenceTable" => sequence_table,
-          "jsonPath"      => sequence_path,
-          "id"            => id,
+          "jsonPath"      => @jsonpath,
+          "id"            => @ident,
           "method"        => "#{self.class}#initialize"
         )
       end
