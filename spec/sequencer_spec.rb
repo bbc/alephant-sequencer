@@ -15,7 +15,31 @@ describe Alephant::Sequencer do
 
       expect_any_instance_of(Alephant::Sequencer::SequenceTable).to receive(:initialize)
       expect_any_instance_of(Alephant::Sequencer::SequenceTable).to receive(:sequence_exists)
-      expect(subject.create(:table_name, ident, jsonpath, keep_all, config)).to be_a Alephant::Sequencer::Sequencer
+
+      opts = {
+        :ident => ident,
+        :jsonpath => jsonpath,
+        :keep_all => keep_all,
+        :config => config
+      }
+
+      expect(subject.create(:table_name, opts)).to be_a Alephant::Sequencer::Sequencer
+    end
+
+    it "should use default opts if options not provided" do
+      expect_any_instance_of(Alephant::Sequencer::SequenceTable).to receive(:sequence_exists)
+
+      opts = {
+        :ident => ident
+      }
+
+      instance = subject.create(:table_name, opts)
+
+      expect(instance).to be_a Alephant::Sequencer::Sequencer
+      expect(instance.ident).to eq(ident)
+      expect(instance.jsonpath).to eq(nil)
+      expect(instance.keep_all).to eq(true)
+      expect(instance.cache).to be_a(Alephant::Sequencer::SequenceCache)
     end
   end
 
