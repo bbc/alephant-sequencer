@@ -31,7 +31,7 @@ module Alephant
           logger.metric "GetKeyMiss" unless result
           result ? result : set(key, block.call)
         rescue StandardError => e
-          block.call if block_given?
+          block.call
         end
       end
 
