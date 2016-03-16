@@ -8,7 +8,7 @@ module Alephant
 
       attr_reader :config
 
-      DEFAULT_TTL  = 5
+      DEFAULT_TTL  = 2
 
       def initialize(config={})
         @config = config
@@ -46,7 +46,7 @@ module Alephant
       end
 
       def ttl
-        config["elasticache_ttl"] || DEFAULT_TTL
+        config["sequencer_elasticache_ttl"] || DEFAULT_TTL
       end
 
       def versioned(key)
