@@ -37,10 +37,9 @@ module Alephant
 
       def update_sequence_id(ident, value, last_seen_check = nil)
         begin
-
           current_sequence = last_seen_check.nil? ? sequence_for(ident) : last_seen_check
-          @mutex.synchronize do
 
+          dynamo_response = @mutex.synchronize do
             client.put_item({
               :table_name => table_name,
               :item => {
@@ -73,6 +72,9 @@ module Alephant
             "value"  => value,
             "method" => "#{self.class}#update_sequence_id"
           )
+
+          dynamo_response
+
         rescue AWS::DynamoDB::Errors::ConditionalCheckFailedException
           logger.metric "SequencerFailedConditionalChecks"
           logger.error(
