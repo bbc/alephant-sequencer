@@ -24,6 +24,9 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rspec-nc"
   spec.add_development_dependency "guard"
   spec.add_development_dependency "guard-rspec"
+  # listen added as newer version breaks bundle update
+  # due to requiring ruby_dep or ruby > 2.2
+  spec.add_development_dependency "listen", "< 3.1.0"
   spec.add_development_dependency "pry"
   spec.add_development_dependency "pry-remote"
   spec.add_development_dependency "pry-nav"
