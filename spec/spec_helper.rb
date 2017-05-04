@@ -1,6 +1,5 @@
-$: << File.join(File.dirname(__FILE__),"..", "lib")
+$LOAD_PATH << File.join(File.dirname(__FILE__), '..', 'lib')
 
-require "pry"
-require "alephant/sequencer"
-require "alephant/support"
-
+require 'pry'
+require 'alephant/sequencer'
+require 'alephant/support'

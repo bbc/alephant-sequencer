@@ -1,7 +1,7 @@
-require "alephant/sequencer/version"
-require "alephant/sequencer/sequencer"
-require "alephant/sequencer/sequence_table"
-require "alephant/sequencer/sequence_cache"
+require 'alephant/sequencer/version'
+require 'alephant/sequencer/sequencer'
+require 'alephant/sequencer/sequence_table'
+require 'alephant/sequencer/sequence_cache'
 
 module Alephant
   module Sequencer
@@ -9,13 +9,13 @@ module Alephant
 
     def self.create(table_name, opts = {})
       defaults = {
-        :jsonpath => nil,
-        :keep_all => true,
-        :config => {}
+        jsonpath: nil,
+        keep_all: true,
+        config:   {}
       }
 
       opts = defaults.merge(opts).tap do |opts|
-        opts[:cache] = self.cache(opts[:config])
+        opts[:cache] = cache(opts[:config])
       end
 
       @@sequence_tables[table_name] ||= SequenceTable.new(table_name)
