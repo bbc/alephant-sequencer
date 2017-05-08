@@ -1,5 +1,5 @@
-require "dalli-elasticache"
-require "alephant/logger"
+require 'dalli-elasticache'
+require 'alephant/logger'
 
 module Alephant
   module Sequencer
@@ -8,31 +8,29 @@ module Alephant
 
       attr_reader :config
 
-      DEFAULT_TTL  = 2
+      DEFAULT_TTL = 2
 
-      def initialize(config={})
+      def initialize(config = {})
         @config = config
 
-        unless config_endpoint.nil?
-          @elasticache ||= ::Dalli::ElastiCache.new(config_endpoint, { :expires_in => ttl })
-          @client ||= @elasticache.client
-        else
-          logger.debug "Alephant::SequenceCache::#initialize: No config endpoint, NullClient used"
-          logger.metric "NoConfigEndpoint"
+        if config_endpoint.nil?
+          logger.debug 'Alephant::SequenceCache::#initialize: No config endpoint, NullClient used'
+          logger.metric 'NoConfigEndpoint'
           @client = NullClient.new
+        else
+          @elasticache ||= ::Dalli::ElastiCache.new(config_endpoint, expires_in: ttl)
+          @client ||= @elasticache.client
         end
       end
 
-      def get(key, &block)
-        begin
-          versioned_key = versioned key
-          result = @client.get versioned_key
-          logger.info "Alephant::SequenceCache#get key: #{versioned_key} - #{result ? 'hit' : 'miss'}"
-          logger.metric "GetKeyMiss" unless result
-          result ? result : set(key, block.call)
-        rescue StandardError => e
-          block.call
-        end
+      def get(key)
+        versioned_key = versioned key
+        result = @client.get versioned_key
+        logger.info "Alephant::SequenceCache#get key: #{versioned_key} - #{result ? 'hit' : 'miss'}"
+        logger.metric 'GetKeyMiss' unless result
+        result ? result : set(key, yield)
+      rescue StandardError => e
+        yield
       end
 
       def set(key, value, ttl = nil)
@@ -42,26 +40,26 @@ module Alephant
       private
 
       def config_endpoint
-        config["elasticache_config_endpoint"]
+        config[:elasticache_config_endpoint] || config['elasticache_config_endpoint']
       end
 
       def ttl
-        config["sequencer_elasticache_ttl"] || DEFAULT_TTL
+        config[:sequencer_elasticache_ttl] || config['sequencer_elasticache_ttl'] || DEFAULT_TTL
       end
 
       def versioned(key)
-        [key, cache_version].compact.join("_")
+        [key, cache_version].compact.join('_')
       end
 
       def cache_version
-        config["elasticache_cache_version"]
+        config[:elasticache_cache_version] || config['elasticache_cache_version']
       end
     end
 
     class NullClient
       def get(key); end
 
-      def set(key, value, ttl = nil)
+      def set(_key, value, _ttl = nil)
         value
       end
     end

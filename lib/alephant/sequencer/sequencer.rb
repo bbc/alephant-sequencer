@@ -1,5 +1,5 @@
-require "jsonpath"
-require "alephant/logger"
+require 'jsonpath'
+require 'alephant/logger'
 
 module Alephant
   module Sequencer
@@ -16,11 +16,11 @@ module Alephant
         @exists   = exists?
         @jsonpath = opts[:jsonpath]
         logger.info(
-          "event"         => "SequencerInitialized",
-          "sequenceTable" => sequence_table,
-          "jsonPath"      => @jsonpath,
-          "id"            => @ident,
-          "method"        => "#{self.class}#initialize"
+          'event'         => 'SequencerInitialized',
+          'sequenceTable' => sequence_table,
+          'jsonPath'      => @jsonpath,
+          'id'            => @ident,
+          'method'        => "#{self.class}#initialize"
         )
       end
 
@@ -34,21 +34,21 @@ module Alephant
         end
       end
 
-      def validate(msg, &block)
+      def validate(msg)
         last_seen_id = get_last_seen
         sequential = ((last_seen_id || 0) < Sequencer.sequence_id_from(msg, jsonpath))
 
-        block.call if (sequential || keep_all)
+        yield if sequential || keep_all
 
         if sequential
           set_last_seen(msg, last_seen_id)
         else
-          logger.metric "SequencerNonSequentialMessageCount"
+          logger.metric 'SequencerNonSequentialMessageCount'
           logger.info(
-            "event"      => "NonSequentialMessageReceived",
-            "id"         => ident,
-            "lastSeenId" => last_seen_id,
-            "method"     => "#{self.class}#validate"
+            'event'      => 'NonSequentialMessageReceived',
+            'id'         => ident,
+            'lastSeenId' => last_seen_id,
+            'method'     => "#{self.class}#validate"
           )
         end
       end
@@ -57,9 +57,9 @@ module Alephant
         @exists = false
         @sequence_table.delete_item!(ident).tap do
           logger.info(
-            "event"  => "SequenceIdDeleted",
-            "id"     => ident,
-            "method" => "#{self.class}#delete!"
+            'event'  => 'SequenceIdDeleted',
+            'id'     => ident,
+            'method' => "#{self.class}#delete!"
           )
         end
       end

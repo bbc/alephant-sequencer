@@ -1,23 +1,23 @@
-require "spec_helper"
+require 'spec_helper'
 
 describe Alephant::Sequencer do
   let(:ident)    { :ident }
-  let(:jsonpath) { "$.sequence_id" }
+  let(:jsonpath) { '$.sequence_id' }
   let(:sequence_table) { double(Alephant::Sequencer::SequenceTable) }
   let(:keep_all) { true }
-  let(:config) { { "elasticache_config_endpoint" => "/foo" } }
+  let(:config) { { 'elasticache_config_endpoint' => '/foo' } }
   let(:cache) { Alephant::Sequencer::SequenceCache.new(config) }
-  let(:opts) {
+  let(:opts) do
     {
-      :id => ident,
-      :jsonpath => jsonpath,
-      :keep_all => keep_all,
-      :cache => cache
+      id:       ident,
+      jsonpath: jsonpath,
+      keep_all: keep_all,
+      cache:    cache
     }
-  }
+  end
 
-  describe ".create" do
-    it "should return a Sequencer" do
+  describe '.create' do
+    it 'should return a Sequencer' do
       expect_any_instance_of(Dalli::ElastiCache).to receive(:initialize)
       expect_any_instance_of(Dalli::ElastiCache).to receive(:client).and_return(Dalli::Client.new)
 
@@ -25,20 +25,20 @@ describe Alephant::Sequencer do
       expect_any_instance_of(Alephant::Sequencer::SequenceTable).to receive(:sequence_exists)
 
       opts = {
-        :id => ident,
-        :jsonpath => jsonpath,
-        :keep_all => keep_all,
-        :config => config
+        id:       ident,
+        jsonpath: jsonpath,
+        keep_all: keep_all,
+        config:   config
       }
 
       expect(subject.create(:table_name, opts)).to be_a Alephant::Sequencer::Sequencer
     end
 
-    it "should use default opts if options not provided" do
+    it 'should use default opts if options not provided' do
       expect_any_instance_of(Alephant::Sequencer::SequenceTable).to receive(:sequence_exists)
 
       opts = {
-        :id => ident
+        id: ident
       }
 
       instance = subject.create(:table_name, opts)
@@ -52,15 +52,15 @@ describe Alephant::Sequencer do
   end
 
   describe Alephant::Sequencer::Sequencer do
-    let(:data)      { double() }
+    let(:data)      { double }
     let(:last_seen) { 42 }
 
-    describe "#initialize" do
-      subject (:instance) {
+    describe '#initialize' do
+      subject (:instance) do
         described_class.new(sequence_table, opts)
-      }
+      end
 
-      it "sets @jsonpath, @ident" do
+      it 'sets @jsonpath, @ident' do
         expect(sequence_table).to receive(:sequence_exists)
 
         expect_any_instance_of(Dalli::ElastiCache).to receive(:initialize)
@@ -70,26 +70,25 @@ describe Alephant::Sequencer do
         expect(instance.ident).to eq(ident)
         expect(instance.keep_all).to eq(true)
       end
-
     end
 
-    describe "#validate" do
-      let(:message) { double() }
+    describe '#validate' do
+      let(:message) { double }
 
       let(:an_uncalled_proc) do
-        a_block = double()
+        a_block = double
         expect(a_block).to_not receive(:called).with(message)
 
-        Proc.new do |msg|
+        proc do |msg|
           a_block.called(msg)
         end
       end
 
       let(:a_proc) do
-        a_block = double()
+        a_block = double
         expect(a_block).to receive(:called)
 
-        Proc.new do
+        proc do
           a_block.called
         end
       end
@@ -98,11 +97,11 @@ describe Alephant::Sequencer do
       let(:stubbed_seen_high) { 3 }
       let(:stubbed_seen_low)  { 1 }
 
-      subject (:instance) {
+      subject (:instance) do
         described_class.new(sequence_table, opts)
-      }
+      end
 
-      it "should call the passed block" do
+      it 'should call the passed block' do
         expect(sequence_table).to receive(:sequence_exists)
         expect(sequence_table).to receive(:sequence_for).with(ident)
 
@@ -117,7 +116,7 @@ describe Alephant::Sequencer do
         instance.validate(message, &a_proc)
       end
 
-      context "last_seen_id is nil" do
+      context 'last_seen_id is nil' do
         before(:each) do
           expect_any_instance_of(described_class).to receive(:get_last_seen).and_return(nil)
 
@@ -130,7 +129,7 @@ describe Alephant::Sequencer do
           expect_any_instance_of(Dalli::Client).to receive(:set)
         end
 
-        it "should not call set_last_seen" do
+        it 'should not call set_last_seen' do
           expect_any_instance_of(described_class).to receive(:set_last_seen).with(message, nil)
 
           expect(sequence_table).to receive(:sequence_exists)
@@ -139,7 +138,7 @@ describe Alephant::Sequencer do
         end
       end
 
-      context "last_seen_id == sequence_id_from(msg)" do
+      context 'last_seen_id == sequence_id_from(msg)' do
         before(:each) do
           expect_any_instance_of(described_class).to receive(:get_last_seen).and_return(stubbed_last_seen)
 
@@ -152,7 +151,7 @@ describe Alephant::Sequencer do
           expect_any_instance_of(Dalli::Client).to receive(:set)
         end
 
-        it "should not call set_last_seen(msg, last_seen_id)" do
+        it 'should not call set_last_seen(msg, last_seen_id)' do
           expect_any_instance_of(described_class).to_not receive(:set_last_seen)
 
           expect(sequence_table).to receive(:sequence_exists)
@@ -161,7 +160,7 @@ describe Alephant::Sequencer do
         end
       end
 
-      context "last_seen_id > sequence_id_from(msg)" do
+      context 'last_seen_id > sequence_id_from(msg)' do
         before(:each) do
           expect_any_instance_of(described_class).to receive(:get_last_seen).and_return(stubbed_last_seen)
 
@@ -174,7 +173,7 @@ describe Alephant::Sequencer do
           expect_any_instance_of(Dalli::Client).to receive(:set)
         end
 
-        it "should not call set_last_seen" do
+        it 'should not call set_last_seen' do
           expect_any_instance_of(described_class).to_not receive(:set_last_seen)
 
           expect(sequence_table).to receive(:sequence_exists)
@@ -182,17 +181,17 @@ describe Alephant::Sequencer do
           instance.validate(message, &a_proc)
         end
 
-        context "keep_all is false" do
+        context 'keep_all is false' do
           let(:keep_all) { false }
 
-          it "should not call the passed block with msg" do
+          it 'should not call the passed block with msg' do
             expect(sequence_table).to receive(:sequence_exists)
 
             opts = {
-              :id => ident,
-              :jsonpath => jsonpath,
-              :keep_all => keep_all,
-              :cache => cache
+              id:       ident,
+              jsonpath: jsonpath,
+              keep_all: keep_all,
+              cache:    cache
             }
 
             instance = described_class.new(sequence_table, opts)
@@ -201,7 +200,7 @@ describe Alephant::Sequencer do
         end
       end
 
-      context "last_seen_id < sequence_id_from(msg)" do
+      context 'last_seen_id < sequence_id_from(msg)' do
         before(:each) do
           expect_any_instance_of(described_class).to receive(:get_last_seen).and_return(stubbed_last_seen)
 
@@ -214,7 +213,7 @@ describe Alephant::Sequencer do
           expect_any_instance_of(Dalli::Client).to receive(:set)
         end
 
-        it "should call set_last_seen(msg, last_seen_id)" do
+        it 'should call set_last_seen(msg, last_seen_id)' do
           expect_any_instance_of(described_class).to receive(:set_last_seen).with(message, stubbed_last_seen)
 
           expect(sequence_table).to receive(:sequence_exists)
@@ -223,18 +222,18 @@ describe Alephant::Sequencer do
         end
       end
 
-      context "values already in cache" do
+      context 'values already in cache' do
         before(:each) do
-          expect(message).to receive(:body).and_return("sequence_id" => 5)
+          expect(message).to receive(:body).and_return('sequence_id' => 5)
 
           expect_any_instance_of(Dalli::ElastiCache).to receive(:initialize)
           expect_any_instance_of(Dalli::ElastiCache).to receive(:client).and_return(Dalli::Client.new)
 
-          expect_any_instance_of(Dalli::Client).to receive(:get).twice.with("ident").and_return(stubbed_last_seen)
+          expect_any_instance_of(Dalli::Client).to receive(:get).twice.with('ident').and_return(stubbed_last_seen)
           expect_any_instance_of(Dalli::Client).to_not receive(:set)
         end
 
-        it "should read values from cache and not database" do
+        it 'should read values from cache and not database' do
           expect(sequence_table).to_not receive(:sequence_for)
           expect(sequence_table).to_not receive(:sequence_exists)
 
@@ -245,12 +244,12 @@ describe Alephant::Sequencer do
       end
     end
 
-    describe "#get_last_seen" do
-      subject (:instance) {
+    describe '#get_last_seen' do
+      subject (:instance) do
         described_class.new(sequence_table, opts)
-      }
+      end
 
-      it "returns sequence_table.sequence_for(ident)" do
+      it 'returns sequence_table.sequence_for(ident)' do
         expect_any_instance_of(Dalli::ElastiCache).to receive(:initialize)
         expect_any_instance_of(Dalli::ElastiCache).to receive(:client).and_return(Dalli::Client.new)
 
@@ -267,7 +266,7 @@ describe Alephant::Sequencer do
       end
     end
 
-    describe "#set_last_seen" do
+    describe '#set_last_seen' do
       before(:each) do
         expect(described_class).to receive(:sequence_id_from).and_return(last_seen)
 
@@ -278,11 +277,11 @@ describe Alephant::Sequencer do
         expect_any_instance_of(Dalli::Client).to receive(:set).twice
       end
 
-      subject (:instance) {
+      subject (:instance) do
         described_class.new(sequence_table, opts)
-      }
+      end
 
-      it "calls update_sequence_id(ident, last_seen)" do
+      it 'calls update_sequence_id(ident, last_seen)' do
         expect(sequence_table).to receive(:sequence_exists).twice
 
         expect(sequence_table).to receive(:update_sequence_id)
@@ -292,20 +291,20 @@ describe Alephant::Sequencer do
       end
     end
 
-    describe ".sequence_id_from" do
-      it "should return the id described by the set jsonpath" do
-        msg = Struct.new(:body).new("set_sequence_id" => 1)
+    describe '.sequence_id_from' do
+      it 'should return the id described by the set jsonpath' do
+        msg = Struct.new(:body).new('set_sequence_id' => 1)
 
-        expect(described_class.sequence_id_from(msg, "$.set_sequence_id")).to eq(1)
+        expect(described_class.sequence_id_from(msg, '$.set_sequence_id')).to eq(1)
       end
     end
 
-    describe "#sequential?" do
+    describe '#sequential?' do
       before(:each) do
         expect_any_instance_of(described_class).to receive(:get_last_seen).and_return(1)
 
         expect(data).to receive(:body)
-          .and_return("sequence_id" => id_value)
+          .and_return('sequence_id' => id_value)
 
         expect(sequence_table).to receive(:sequence_exists)
 
@@ -316,57 +315,57 @@ describe Alephant::Sequencer do
         expect_any_instance_of(Dalli::Client).to receive(:set)
       end
 
-      subject (:instance) {
+      subject (:instance) do
         described_class.new(sequence_table, opts)
-      }
+      end
 
       context "jsonpath = '$.sequence_id'" do
-        let(:jsonpath) { "$.sequence_id" }
+        let(:jsonpath) { '$.sequence_id' }
 
-        context "sequential" do
+        context 'sequential' do
           let(:id_value) { 2 }
 
-          it "is true" do
+          it 'is true' do
             expect(instance.sequential?(data)).to be
           end
         end
 
-        context "nonsequential" do
+        context 'nonsequential' do
           let(:id_value) { 0 }
 
-          it "is false" do
+          it 'is false' do
             expect(instance.sequential?(data)).to be false
           end
         end
       end
 
-      context "jsonpath = nil" do
-        let(:jsonpath) { "$.sequence_id" }
+      context 'jsonpath = nil' do
+        let(:jsonpath) { '$.sequence_id' }
 
-        context "sequential" do
+        context 'sequential' do
           let(:id_value) { 2 }
 
-          it "is true" do
+          it 'is true' do
             expect(instance.sequential?(data)).to be
           end
         end
 
-        context "nonsequential" do
+        context 'nonsequential' do
           let(:id_value) { 0 }
 
-          it "is false" do
+          it 'is false' do
             expect(instance.sequential?(data)).to be false
           end
         end
       end
     end
 
-    describe "#truncate!" do
-      subject (:instance) {
+    describe '#truncate!' do
+      subject (:instance) do
         described_class.new(sequence_table, opts)
-      }
+      end
 
-      it "verify SequenceTable#truncate!" do
+      it 'verify SequenceTable#truncate!' do
         expect_any_instance_of(Dalli::ElastiCache).to receive(:initialize)
         expect_any_instance_of(Dalli::ElastiCache).to receive(:client).and_return(Dalli::Client.new)
 

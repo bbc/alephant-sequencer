@@ -3,6 +3,7 @@
 Gemfile.lock
 .rspec
 *.gem
+*.log
 
 /pkg
 /tmp
