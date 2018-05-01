@@ -7,7 +7,7 @@ Gem::Specification.new do |spec|
   spec.name          = "alephant-sequencer"
   spec.version       = Alephant::Sequencer::VERSION
   spec.authors       = ["BBC News"]
-  spec.email         = ["FutureMediaNewsRubyGems@bbc.co.uk"]
+  spec.email         = ["D&ENewsFrameworksTeam@bbc.co.uk"]
   spec.summary       = %q{Adds sequencing functionality to Alephant.}
   spec.homepage      = ""
   spec.license       = "MIT"
@@ -31,7 +31,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "pry-remote"
   spec.add_development_dependency "pry-nav"
 
-  spec.add_runtime_dependency "aws-sdk", "~> 1.0"
+  spec.add_runtime_dependency "aws-sdk-dynamodb"
   spec.add_runtime_dependency "alephant-logger"
   spec.add_runtime_dependency "alephant-support"
   spec.add_runtime_dependency "jsonpath"

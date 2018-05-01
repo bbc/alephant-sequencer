@@ -1,4 +1,4 @@
-require 'aws-sdk'
+require "aws-sdk-dynamodb"
 require 'thread'
 require 'timeout'
 
@@ -12,8 +12,10 @@ module Alephant
       attr_reader :table_name, :client
 
       def initialize(table_name)
+        options = {}
+        options.merge!({endpoint: ENV['AWS_DYNAMO_DB_ENDPOINT']}) if ENV['AWS_DYNAMO_DB_ENDPOINT']
         @mutex      = Mutex.new
-        @client     = AWS::DynamoDB::Client::V20120810.new
+        @client     = Aws::DynamoDB::Client.new(options)
         @table_name = table_name
       end
 
@@ -70,7 +72,7 @@ module Alephant
 
         dynamo_response
 
-      rescue AWS::DynamoDB::Errors::ConditionalCheckFailedException
+      rescue Aws::DynamoDB::Errors::ConditionalCheckFailedException
         logger.metric 'SequencerFailedConditionalChecks'
         logger.error(
           'event'                => 'DynamoDBConditionalCheckFailed',
