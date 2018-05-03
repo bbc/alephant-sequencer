@@ -41,12 +41,8 @@ module Alephant
         dynamo_response = @mutex.synchronize do
           client.put_item(table_name:           table_name,
                           item:                 {
-                            'key'   => {
-                              'S' => ident
-                            },
-                            'value' => {
-                              'N' => value.to_s
-                            }
+                            'key'   => ident,
+                            'value' => value.to_s
                           },
                           expected:             {
                             'key'   => {
@@ -54,9 +50,7 @@ module Alephant
                             },
                             'value' => {
                               comparison_operator:  'GE',
-                              attribute_value_list: [
-                                { 'N' => current_sequence.to_s }
-                              ]
+                              attribute_value_list: [current_sequence.to_s]
                             }
                           },
                           conditional_operator: 'OR')
