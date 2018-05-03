@@ -98,9 +98,7 @@ module Alephant
         {
           table_name: table_name,
           key:        {
-            'key' => {
-              'S' => ident.to_s
-            }
+            'key' => ident.to_s
           }
         }
       end
