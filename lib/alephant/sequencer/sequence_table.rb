@@ -32,7 +32,7 @@ module Alephant
           item_payload(ident)
         )
 
-        !data.empty? ? data[:item]['value'][:n].to_i : 0
+        !data.empty? ? data.item['value'].to_i : 0
       end
 
       def update_sequence_id(ident, value, last_seen_check = nil)
