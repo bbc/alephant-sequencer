@@ -66,7 +66,7 @@ module Alephant
 
         dynamo_response
 
-      rescue Aws::DynamoDB::Errors::ConditionalCheckFailedException
+      rescue Aws::DynamoDB::Errors::ConditionalCheckFailedException => e
         logger.metric 'SequencerFailedConditionalChecks'
         logger.error(
           'event'                => 'DynamoDBConditionalCheckFailed',
