@@ -1,4 +1,4 @@
-require 'aws-sdk'
+require "aws-sdk-dynamodb"
 require 'thread'
 require 'timeout'
 
@@ -12,8 +12,10 @@ module Alephant
       attr_reader :table_name, :client
 
       def initialize(table_name)
+        options = {}
+        options[:endpoint] = ENV['AWS_DYNAMO_DB_ENDPOINT'] if ENV['AWS_DYNAMO_DB_ENDPOINT']
         @mutex      = Mutex.new
-        @client     = AWS::DynamoDB::Client::V20120810.new
+        @client     = Aws::DynamoDB::Client.new(options)
         @table_name = table_name
       end
 
@@ -30,7 +32,7 @@ module Alephant
           item_payload(ident)
         )
 
-        !data.empty? ? data[:item]['value'][:n].to_i : 0
+        !data.empty? ? data.item['value'].to_i : 0
       end
 
       def update_sequence_id(ident, value, last_seen_check = nil)
@@ -39,12 +41,8 @@ module Alephant
         dynamo_response = @mutex.synchronize do
           client.put_item(table_name:           table_name,
                           item:                 {
-                            'key'   => {
-                              'S' => ident
-                            },
-                            'value' => {
-                              'N' => value.to_s
-                            }
+                            'key'   => ident,
+                            'value' => value.to_s
                           },
                           expected:             {
                             'key'   => {
@@ -52,9 +50,7 @@ module Alephant
                             },
                             'value' => {
                               comparison_operator:  'GE',
-                              attribute_value_list: [
-                                { 'N' => current_sequence.to_s }
-                              ]
+                              attribute_value_list: [current_sequence.to_s]
                             }
                           },
                           conditional_operator: 'OR')
@@ -70,7 +66,7 @@ module Alephant
 
         dynamo_response
 
-      rescue AWS::DynamoDB::Errors::ConditionalCheckFailedException
+      rescue Aws::DynamoDB::Errors::ConditionalCheckFailedException => e
         logger.metric 'SequencerFailedConditionalChecks'
         logger.error(
           'event'                => 'DynamoDBConditionalCheckFailed',
@@ -96,9 +92,7 @@ module Alephant
         {
           table_name: table_name,
           key:        {
-            'key' => {
-              'S' => ident.to_s
-            }
+            'key' => ident.to_s
           }
         }
       end
