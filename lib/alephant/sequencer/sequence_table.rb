@@ -13,7 +13,7 @@ module Alephant
 
       def initialize(table_name)
         options = {}
-        options.merge!({endpoint: ENV['AWS_DYNAMO_DB_ENDPOINT']}) if ENV['AWS_DYNAMO_DB_ENDPOINT']
+        options[:endpoint] = ENV['AWS_DYNAMO_DB_ENDPOINT'] if ENV['AWS_DYNAMO_DB_ENDPOINT']
         @mutex      = Mutex.new
         @client     = Aws::DynamoDB::Client.new(options)
         @table_name = table_name
