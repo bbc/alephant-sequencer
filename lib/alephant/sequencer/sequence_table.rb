@@ -39,21 +39,18 @@ module Alephant
         current_sequence = last_seen_check.nil? ? sequence_for(ident) : last_seen_check
 
         dynamo_response = @mutex.synchronize do
-          client.put_item(table_name:           table_name,
-                          item:                 {
-                            'key'   => ident,
-                            'value' => value.to_s
-                          },
-                          expected:             {
-                            'key'   => {
-                              comparison_operator: 'NULL'
-                            },
-                            'value' => {
-                              comparison_operator:  'GE',
-                              attribute_value_list: [current_sequence.to_s]
-                            }
-                          },
-                          conditional_operator: 'OR')
+          client.put_item(
+            table_name: table_name,
+            item: {
+              'key'   => ident,
+              'value' => value
+            },
+            condition_expression: ':current_value < :new_value',
+            expression_attribute_values: {
+              ':current_value' => current_sequence,
+              ':new_value'     => value
+            }
+          )
         end
 
         logger.metric('SequencerFailedConditionalChecks', value: 0)
