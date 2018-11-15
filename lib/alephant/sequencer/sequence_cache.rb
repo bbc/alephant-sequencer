@@ -14,7 +14,7 @@ module Alephant
         @config = config
 
         if config_endpoint.nil?
-          logger.debug 'Alephant::SequenceCache::#initialize: No config endpoint, NullClient used'
+          logger.error 'Alephant::SequenceCache::#initialize: No config endpoint, NullClient used'
           logger.metric 'NoConfigEndpoint'
           @client = NullClient.new
         else
@@ -29,6 +29,7 @@ module Alephant
         logger.metric 'GetKeyMiss' unless result
         result ? result : set(key, yield)
       rescue StandardError => e
+        logger.error(e.to_s)
         yield
       end
 
