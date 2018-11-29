@@ -23,6 +23,7 @@ describe Alephant::Sequencer do
 
   describe '.create' do
     it 'should return a Sequencer' do
+      expect_any_instance_of(Alephant::Sequencer::SequenceTable).to receive(:initialize)
       expect_any_instance_of(Alephant::Sequencer::SequenceTable).to receive(:sequence_exists)
 
       expect(subject.create(:table_name, opts)).to be_a Alephant::Sequencer::Sequencer
