@@ -26,13 +26,6 @@ describe Alephant::Sequencer do
       expect_any_instance_of(Alephant::Sequencer::SequenceTable).to receive(:initialize)
       expect_any_instance_of(Alephant::Sequencer::SequenceTable).to receive(:sequence_exists)
 
-      opts = {
-        id:       ident,
-        jsonpath: jsonpath,
-        keep_all: keep_all,
-        config:   config
-      }
-
       expect(subject.create(:table_name, opts)).to be_a Alephant::Sequencer::Sequencer
     end
 
@@ -63,6 +56,7 @@ describe Alephant::Sequencer do
       end
 
       it 'sets @jsonpath, @ident' do
+        allow(cache).to receive(:get).and_yield
         expect(sequence_table).to receive(:sequence_exists)
 
         expect(instance.jsonpath).to eq(jsonpath)
@@ -337,10 +331,13 @@ describe Alephant::Sequencer do
         described_class.new(sequence_table, opts)
       end
 
-      it 'verify SequenceTable#truncate!' do
-        expect(sequence_table).to receive(:sequence_exists)
-        expect(sequence_table).to receive(:truncate!)
+      before do
+        expect(cache).to receive(:get).with(ident).and_yield
+      end
 
+      it 'verify SequenceTable#truncate!' do
+        expect(sequence_table).to receive(:truncate!)
+        expect(sequence_table).to receive(:sequence_exists).with(ident)
         instance.truncate!
       end
     end

@@ -12,31 +12,42 @@ module Alephant
 
       def initialize(config = {})
         @config = config
-
-        if config_endpoint.nil?
-          logger.debug 'Alephant::SequenceCache::#initialize: No config endpoint, NullClient used'
-          logger.metric 'NoConfigEndpoint'
-          @client = NullClient.new
-        else
-          @client ||= ::Dalli::Client.new(config_endpoint, expires_in: ttl)
-        end
       end
 
       def get(key)
         versioned_key = versioned key
-        result = @client.get versioned_key
-        logger.info "Alephant::SequenceCache#get key: #{versioned_key} - #{result ? 'hit' : 'miss'}"
+        result = client.get versioned_key
+        logger.info(
+          method: 'Alephant::SequenceCache#get',
+          key:    versioned_key,
+          result: result ? 'hit' : 'miss'
+        )
         logger.metric 'GetKeyMiss' unless result
         result ? result : set(key, yield)
-      rescue StandardError => e
+      rescue StandardError => error
+        logger.error(
+          method: 'Alephant::Sequencer::SequenceCache#get',
+          error:  error
+        )
         yield
       end
 
       def set(key, value, ttl = nil)
-        value.tap { |o| @client.set(versioned(key), o, ttl) }
+        value.tap { |o| client.set(versioned(key), o, ttl) }
       end
 
       private
+
+      def client
+        return @client ||= ::Dalli::Client.new(config_endpoint, expires_in: ttl) unless config_endpoint.nil?
+
+        logger.error(
+          method:  'Alephant::Sequencer::SequenceCache#initialize',
+          message: 'No config endpoint, NullClient used'
+        )
+        logger.metric 'NoConfigEndpoint'
+        @client = NullClient.new
+      end
 
       def config_endpoint
         config[:elasticache_config_endpoint] || config['elasticache_config_endpoint']
